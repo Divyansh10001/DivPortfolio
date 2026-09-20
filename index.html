@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Divyansh Patel</title>
+    <!-- Use a modern Google font -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Playfair+Display:ital@1&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary-orange: #f25019;
+            --text-light: #ffffff;
+            --text-dim: rgba(255, 255, 255, 0.7);
+        }
+
+        html {
+            scroll-behavior: smooth;
+            scroll-padding-top: 120px;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #050505;
+            /* Deep dark background */
+            color: var(--text-light);
+            font-family: 'Inter', sans-serif;
+            /* Allow large scroll for animation */
+            height: 500vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Background Canvas Animation */
+        .canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 0;
+            opacity: 0.6;
+            /* Slight transparency so text stands out */
+        }
+
+        canvas {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: cover;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Overlay Content Container */
+        .overlay-content {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            /* Height is 100vh to fit the screen initially, then scroll up */
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Navigation Bar */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 2rem 4rem;
+            backdrop-filter: blur(15px);
+            background: rgba(0, 0, 0, 0.5);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            box-sizing: border-box;
+            z-index: 1000;
+        }
+
+        .logo {
+            font-weight: 800;
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: var(--text-light);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 400;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-orange);
+        }
+
+        .cta-btn {
+            background-color: var(--primary-orange);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s ease, background-color 0.3s;
+        }
+
+        .cta-btn:hover {
+            background-color: #d14112;
+            transform: scale(1.05);
+        }
+
+        /* Hero Section */
+        .hero {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 0 4rem;
+            margin-top: 8rem;
+        }
+
+        .greeting {
+            font-size: 1rem;
+            font-weight: 400;
+            letter-spacing: 2px;
+            margin-bottom: -1rem;
+            color: var(--primary-orange);
+        }
+
+        .main-title {
+            font-size: 12vw;
+            font-weight: 800;
+            margin: 0;
+            line-height: 1;
+            letter-spacing: -2px;
+            white-space: nowrap;
+            /* Add some mix-blend-mode for a cool effect with canvas */
+            mix-blend-mode: overlay;
+            color: rgba(255, 255, 255, 0.9);
+            text-transform: capitalize;
+        }
+
+        .hero-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-top: 4rem;
+            padding-bottom: 4rem;
+        }
+
+        .hero-left {
+            flex: 1;
+            max-width: 400px;
+        }
+
+        .hero-left h2 {
+            font-size: 1.8rem;
+            font-weight: 300;
+            line-height: 1.4;
+            margin-bottom: 1.5rem;
+        }
+
+        .play-btn {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 400;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background 0.3s, border-color 0.3s;
+        }
+
+        .play-btn::before {
+            content: '▶';
+            font-size: 0.8rem;
+            color: var(--primary-orange);
+        }
+
+        .play-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.6);
+        }
+
+        .hero-right {
+            flex: 1;
+            max-width: 500px;
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+
+        .hero-right p {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: var(--text-dim);
+            font-weight: 300;
+        }
+
+        /* Infinite Scrolling Banner */
+        .scrolling-banner-container {
+            width: 100%;
+            overflow: hidden;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1rem 0;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(4px);
+            display: flex;
+            white-space: nowrap;
+        }
+
+        .banner-text {
+            font-size: 1rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+            animation: scroll-banner 30s linear infinite;
+            padding-right: 15px; /* Prevents jumping between loops */
+        }
+
+        .banner-text span {
+            color: var(--primary-orange);
+            margin: 0 15px;
+        }
+
+        @keyframes scroll-banner {
+            0% {
+                transform: translateX(0);
+            }
+
+            100% {
+                transform: translateX(-100%);
+            }
+        }
+
+        /* Projects Section */
+        .projects-section {
+            padding: 6rem 4rem;
+            position: relative;
+            z-index: 10;
+            background: rgba(5, 5, 5, 0.4);
+            backdrop-filter: blur(8px);
+        }
+
+        .section-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 4rem;
+            color: var(--text-light);
+            text-align: center;
+            letter-spacing: -1px;
+        }
+
+        .section-title span {
+            color: var(--primary-orange);
+        }
+
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 3rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .project-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), border-color 0.4s ease, box-shadow 0.4s ease;
+            display: flex;
+            flex-direction: column;
+            backdrop-filter: blur(10px);
+        }
+
+        .project-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary-orange);
+            box-shadow: 0 15px 30px rgba(242, 80, 25, 0.15);
+        }
+
+        .project-image-container {
+            width: 100%;
+            height: 220px;
+            background: rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            display: block;
+            /* Make it clickable if wrapped in an anchor */
+            text-decoration: none;
+        }
+
+        .project-image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .project-card:hover .project-image-container img {
+            transform: scale(1.05);
+        }
+
+        .project-image-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, rgba(242, 80, 25, 0.15), rgba(255, 255, 255, 0.02));
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            transition: transform 0.5s ease, color 0.3s ease;
+        }
+
+        .project-card:hover .project-image-placeholder {
+            transform: scale(1.05);
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .project-info {
+            padding: 2.5rem 2rem;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .project-category {
+            font-size: 0.75rem;
+            color: var(--primary-orange);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 1rem;
+        }
+
+        .project-title {
+            font-size: 1.6rem;
+            font-weight: 800;
+            margin: 0 0 1rem 0;
+            color: var(--text-light);
+            line-height: 1.2;
+        }
+
+        .project-description {
+            font-size: 0.95rem;
+            color: var(--text-dim);
+            line-height: 1.7;
+            margin-bottom: 2rem;
+            flex: 1;
+            font-weight: 300;
+        }
+
+        .project-links {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .project-link {
+            text-decoration: none;
+            color: var(--text-light);
+            font-size: 0.85rem;
+            font-weight: 600;
+            padding: 0.6rem 1.2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .project-link:hover {
+            background: var(--primary-orange);
+            border-color: var(--primary-orange);
+            color: white;
+            box-shadow: 0 5px 15px rgba(242, 80, 25, 0.3);
+        }
+
+        /* About Section */
+        .about-section {
+            padding: 6rem 4rem;
+            position: relative;
+            z-index: 10;
+            background: rgba(10, 10, 10, 0.5);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .about-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            gap: 4rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .about-text {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .about-text h3 {
+            font-size: 2.2rem;
+            color: var(--primary-orange);
+            margin-bottom: 1.5rem;
+            font-weight: 800;
+            line-height: 1.2;
+        }
+
+        .about-text p {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: var(--text-dim);
+            margin-bottom: 1.5rem;
+            font-weight: 300;
+        }
+
+        .about-details {
+            flex: 1;
+            min-width: 300px;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .detail-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 2rem;
+            transition: border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .detail-card:hover {
+            border-color: var(--primary-orange);
+            transform: translateX(10px);
+            box-shadow: -5px 10px 20px rgba(242, 80, 25, 0.1);
+        }
+
+        .detail-card h4 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.3rem;
+            color: var(--text-light);
+            font-weight: 600;
+        }
+
+        .detail-card span {
+            color: var(--primary-orange);
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: block;
+            margin-bottom: 1rem;
+        }
+
+        .detail-card p {
+            margin: 0;
+            font-size: 0.95rem;
+            color: var(--text-dim);
+            line-height: 1.6;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Background Animation Canvas -->
+    <div class="canvas-container">
+        <canvas id="scroll-canvas"></canvas>
+    </div>
+
+    <!-- Navigation Bar -->
+    <nav>
+        <div class="logo">Portfolio</div>
+        <div class="nav-links">
+            <a href="#">Home</a>
+            <a href="#about">About</a>
+            <a href="#projects">Projects</a>
+            <a href="#contact">Contact</a>
+        </div>
+    </nav>
+
+    <!-- Foreground Content Overlay -->
+    <div class="overlay-content">
+
+        <section class="hero">
+            <p class="greeting">HI, I AM</p>
+            <h1 class="main-title">Divyansh Patel</h1>
+
+            <div class="hero-bottom">
+                <div class="hero-left">
+                    <h2>Software Developer skilled in React, Python & Figma</h2>
+                    <a href="#contact" class="play-btn"
+                        style="text-decoration:none; display:inline-flex; width:fit-content;">Start a Project</a>
+                </div>
+                <div class="hero-right">
+                    <p>Hey there, I'm Divyansh Patel. I build reliable web applications and bring strong communication
+                        and leadership skills gained from hosting professional events. Currently studying B.Tech CSE at
+                        Vellore Institute of Technology.</p>
+                </div>
+            </div>
+        </section>
+
+        <div class="scrolling-banner-container">
+            <div class="banner-text">
+                REACT <span>•</span> PYTHON <span>•</span> FIGMA <span>•</span> HTML5 <span>•</span> CSS3 <span>•</span> JAVASCRIPT <span>•</span> MYSQL <span>•</span> C/C++ <span>•</span> 
+                REACT <span>•</span> PYTHON <span>•</span> FIGMA <span>•</span> HTML5 <span>•</span> CSS3 <span>•</span> JAVASCRIPT <span>•</span> MYSQL <span>•</span> C/C++ <span>•</span> 
+                REACT <span>•</span> PYTHON <span>•</span> FIGMA <span>•</span> HTML5 <span>•</span> CSS3 <span>•</span> JAVASCRIPT <span>•</span> MYSQL <span>•</span> C/C++ <span>•</span>
+            </div>
+            <div class="banner-text">
+                REACT <span>•</span> PYTHON <span>•</span> FIGMA <span>•</span> HTML5 <span>•</span> CSS3 <span>•</span> JAVASCRIPT <span>•</span> MYSQL <span>•</span> C/C++ <span>•</span> 
+                REACT <span>•</span> PYTHON <span>•</span> FIGMA <span>•</span> HTML5 <span>•</span> CSS3 <span>•</span> JAVASCRIPT <span>•</span> MYSQL <span>•</span> C/C++ <span>•</span> 
+                REACT <span>•</span> PYTHON <span>•</span> FIGMA <span>•</span> HTML5 <span>•</span> CSS3 <span>•</span> JAVASCRIPT <span>•</span> MYSQL <span>•</span> C/C++ <span>•</span>
+            </div>
+        </div>
+
+        <section id="about" class="about-section">
+            <h2 class="section-title">About <span>Me</span></h2>
+            <div class="about-container">
+                <div class="about-text">
+                    <h3>Passionate Developer & Design Enthusiast</h3>
+                    <p>I am a Software Developer skilled in React, Python, and Figma. I build reliable web
+                        applications and bring strong communication and leadership skills gained from hosting
+                        professional events at my university.</p>
+                    <p>With a foundation in Computer Science and Engineering from Vellore Institute of Technology, I
+                        strive to design full-stack product features and contribute to end-to-end feature delivery,
+                        focusing on user accessibility and visual clarity.</p>
+                </div>
+                <div class="about-details">
+                    <div class="detail-card">
+                        <h4>Banaras Locomotive Works</h4>
+                        <span>Intern | May 2026 – June 2026</span>
+                        <p>Developed responsive UIs, translated Figma designs into reusable components, and collaborated
+                            on full-stack feature delivery. Participated in agile workflows and code reviews.</p>
+                    </div>
+                    <div class="detail-card">
+                        <h4>Vellore Institute of Technology</h4>
+                        <span>B.Tech CSE | July 2024 – Present</span>
+                        <p>Pursuing Computer Science and Engineering with a CGPA of 8.25. Active leader and volunteer in
+                            the Society of Manufacturing Engineers (SME) and Technology and Gaming Club (TAG).</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="projects" class="projects-section">
+            <h2 class="section-title">Featured <span>Projects</span></h2>
+            <div class="projects-grid">
+
+                <!-- Project Card 1 -->
+                <div class="project-card">
+                    <a href="https://blwgolf.netlify.app/" target="_blank" class="project-image-container">
+                        <img src="blwgolf_top.jpg" alt="Golf Club Website">
+                    </a>
+                    <div class="project-info">
+                        <span class="project-category">Web Development</span>
+                        <h3 class="project-title">Golf Club Website</h3>
+                        <p class="project-description">Developed a fully responsive, high-performance website using
+                            HTML5, JavaScript, and CSS. Implemented a modern grid-based layout to showcase multimedia
+                            assets with optimized load times, and deployed on Netlify with automated CI/CD updates.</p>
+                    </div>
+                </div>
+
+                <!-- Project Card 2 -->
+                <div class="project-card">
+                    <a href="https://phishyemail.netlify.app/" target="_blank" class="project-image-container"
+                        style="background: #0f172a; display: flex; align-items: center; justify-content: center;">
+                        <img src="phishy_logo.jpg" alt="Phishy AI Email Detection"
+                            style="object-fit: contain; padding: 2rem;">
+                    </a>
+                    <div class="project-info">
+                        <span class="project-category">AI / Security</span>
+                        <h3 class="project-title">Phishy</h3>
+                        <p class="project-description">An AI-powered email phishing detection web application. Features
+                            an advanced heuristic engine that scans suspicious emails for threats, malicious links, and
+                            social engineering tactics in seconds.</p>
+                    </div>
+                </div>
+
+                <!-- Project Card 3 -->
+                <div class="project-card">
+                    <a href="https://www.figma.com/make/ZsFLp4wHpRwx1SLvugup6Y/Complaint-Tracking-System?code-node-id=0-9&p=f&t=KIV6wlZ37R3fwEmD-0&fullscreen=1"
+                        target="_blank" class="project-image-container">
+                        <img src="civictrack_figma_real.png" alt="CivicTrack Figma Prototype">
+                    </a>
+                    <div class="project-info">
+                        <span class="project-category">Figma, UI/UX</span>
+                        <h3 class="project-title">CivicTrack</h3>
+                        <p class="project-description">Built a civic governance solution in a 36-hour Design-a-thon,
+                            implementing geo-tagging and escalation logic. Designed transparency dashboards for
+                            real-time tracking, focusing on user accessibility, and engineered a scalable prototype.</p>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </div>
+
+    <section id="coming-soon"
+        style="padding: 8rem 4rem; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; z-index: 10; overflow: hidden;">
+        <style>
+            @keyframes pulse-glow {
+                0% {
+                    box-shadow: 0 0 15px rgba(242, 80, 25, 0.1), inset 0 0 20px rgba(255, 255, 255, 0.02);
+                }
+
+                50% {
+                    box-shadow: 0 0 35px rgba(242, 80, 25, 0.4), inset 0 0 30px rgba(255, 255, 255, 0.05);
+                }
+
+                100% {
+                    box-shadow: 0 0 15px rgba(242, 80, 25, 0.1), inset 0 0 20px rgba(255, 255, 255, 0.02);
+                }
+            }
+
+            .coming-soon-card {
+                background: linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-top: 1px solid rgba(255, 255, 255, 0.2);
+                border-left: 1px solid rgba(255, 255, 255, 0.2);
+                padding: 4.5rem;
+                border-radius: 24px;
+                backdrop-filter: blur(20px);
+                max-width: 650px;
+                width: 100%;
+                transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                animation: pulse-glow 4s ease-in-out infinite;
+                position: relative;
+            }
+
+            .coming-soon-card:hover {
+                transform: translateY(-12px) scale(1.03);
+                border-color: rgba(242, 80, 25, 0.5);
+                background: linear-gradient(145deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.03));
+            }
+
+            .coming-soon-title {
+                font-size: 3rem;
+                margin-bottom: 1.5rem;
+                color: var(--white);
+                font-weight: 600;
+                letter-spacing: -1px;
+            }
+
+            .coming-soon-title span {
+                background: linear-gradient(90deg, var(--primary-orange), #ff8a00);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+            }
+
+            .coming-soon-text {
+                color: rgba(255, 255, 255, 0.7);
+                font-size: 1.25rem;
+                line-height: 1.8;
+                font-weight: 300;
+            }
+        </style>
+        <div class="coming-soon-card">
+            <h2 class="coming-soon-title">More Projects <span>Coming Soon</span></h2>
+            <p class="coming-soon-text">I'm constantly exploring new ideas and building exciting applications. Stay
+                tuned for my next big release!</p>
+        </div>
+    </section>
+
+    <footer id="contact"
+        style="position: absolute; bottom: 0; left: 0; width: 100%; padding: 4rem; text-align: center; background: rgba(0,0,0,0.5); backdrop-filter: blur(10px); z-index: 20; box-sizing: border-box;">
+        <h2 style="font-size: 2rem; margin-bottom: 2rem; color: var(--primary-orange);">Get In Touch</h2>
+        <div style="display: flex; justify-content: center; gap: 3rem; flex-wrap: wrap;">
+            <a href="mailto:divyansh.p1217@gmail.com"
+                style="color: var(--text-light); text-decoration: none; font-size: 1.1rem; transition: color 0.3s;"
+                onmouseover="this.style.color='var(--primary-orange)'"
+                onmouseout="this.style.color='var(--text-light)'">divyansh.p1217@gmail.com</a>
+            <a href="tel:+919473921948"
+                style="color: var(--text-light); text-decoration: none; font-size: 1.1rem; transition: color 0.3s;"
+                onmouseover="this.style.color='var(--primary-orange)'"
+                onmouseout="this.style.color='var(--text-light)'">+91 9473921948</a>
+            <a href="https://www.linkedin.com/in/divyansh-patel-5469203b1" target="_blank"
+                style="color: var(--text-light); text-decoration: none; font-size: 1.1rem; transition: color 0.3s;"
+                onmouseover="this.style.color='var(--primary-orange)'"
+                onmouseout="this.style.color='var(--text-light)'">LinkedIn</a>
+            <a href="https://github.com/Divyansh10001" target="_blank"
+                style="color: var(--text-light); text-decoration: none; font-size: 1.1rem; transition: color 0.3s;"
+                onmouseover="this.style.color='var(--primary-orange)'"
+                onmouseout="this.style.color='var(--text-light)'">GitHub</a>
+        </div>
+        <p style="margin-top: 2rem; color: var(--text-dim); font-size: 0.9rem;">📍 Vellore, India</p>
+    </footer>
+
+    <script>
+        const canvas = document.getElementById('scroll-canvas');
+        const context = canvas.getContext('2d');
+
+        const frameCount = 240;
+        const currentFrame = index => (
+            `frames/frame_${(index).toString().padStart(6, '0')}.jpg`
+        );
+
+        const preloadImages = () => {
+            for (let i = 1; i <= frameCount; i++) {
+                const img = new Image();
+                img.src = currentFrame(i);
+            }
+        };
+
+        const img = new Image();
+        img.src = currentFrame(1);
+
+        // Wait for first image to load before drawing
+        img.onload = function () {
+            // Set canvas dimensions to match window or a base resolution
+            // Using 1920x1080 as a base for standard 16:9 frames
+            canvas.width = 1920;
+            canvas.height = 1080;
+            drawScaledImage(img);
+        }
+
+        function drawScaledImage(img) {
+            // Draw image covering the canvas (object-fit: cover equivalent in canvas)
+            const hRatio = canvas.width / img.width;
+            const vRatio = canvas.height / img.height;
+            const ratio = Math.max(hRatio, vRatio);
+            const centerShift_x = (canvas.width - img.width * ratio) / 2;
+            const centerShift_y = (canvas.height - img.height * ratio) / 2;
+
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            context.drawImage(img, 0, 0, img.width, img.height,
+                centerShift_x, centerShift_y, img.width * ratio, img.height * ratio);
+        }
+
+        const updateImage = index => {
+            img.src = currentFrame(index);
+            if (img.complete) {
+                drawScaledImage(img);
+            } else {
+                img.onload = () => drawScaledImage(img);
+            }
+        }
+
+        window.addEventListener('scroll', () => {
+            const scrollTop = document.documentElement.scrollTop;
+            const maxScrollTop = document.documentElement.scrollHeight - window.innerHeight;
+            const scrollFraction = scrollTop / maxScrollTop;
+            const frameIndex = Math.min(
+                frameCount - 1,
+                Math.floor(scrollFraction * frameCount)
+            );
+
+            // Use requestAnimationFrame for smooth drawing
+            requestAnimationFrame(() => updateImage(frameIndex + 1));
+        });
+
+        // Preload rest of the images
+        preloadImages();
+    </script>
+</body>
+
+</html>
